@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Brain Tumor Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #cceeff, #ffffff);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        h1 {
+            font-weight: bold;
+            color: #007bff;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        form {
+            background-color: #ffffff;
+            border-left: 5px solid #007bff;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        .card-img-top {
+            width: 100%;
+            height: 250px;
+            object-fit: contain;
+            background-color: #e9f7f9;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .result-card {
+            margin-bottom: 30px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid #b2ebf2;
+            animation: fadeInUp 1s ease-in-out;
+            border-radius: 15px;
+        }
+
+        .result-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 25px rgba(0, 123, 255, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #007bff, #28a745);
+            border: none;
+            font-weight: bold;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, #0056b3, #218838);
+        }
+
+        .btn-outline-secondary {
+            border-color: #007bff;
+            color: #007bff;
+            font-weight: 500;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        h2 {
+            color: #28a745;
+            animation: fadeIn 1.2s ease-in-out;
+        }
+
+        .card-title {
+            color: #007bff;
+        }
+
+        .card-text strong {
+            color: #28a745;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            0% { opacity: 0; transform: translateY(40px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Brain Tumor Detection from MRI Images</h1>
+
+        <form action="/predict" method="post" enctype="multipart/form-data" class="border p-4 shadow rounded">
+            <div class="mb-3">
+                <label for="images" class="form-label fw-semibold text-primary">Upload MRI Images</label>
+                <input type="file" class="form-control" name="images" id="images" multiple accept="image/*" required>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Predict</button>
+            </div>
+        </form>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('segmentation') }}" class="btn btn-outline-secondary">🧪 Try Segmentation</a>
+        </div>
+
+        {% if results %}
+            <h2 class="mt-5 text-center">🧠 Prediction Results</h2>
+            <div class="row mt-4">
+                {% for result in results %}
+                    <div class="col-md-4">
+                        <div class="card result-card shadow-sm">
+                            <img src="{{ url_for('static', filename='uploads/' + result.filename) }}" class="card-img-top" alt="{{ result.filename }}">
+                            <div class="card-body">
+                                <h5 class="card-title text-center">{{ result.filename }}</h5>
+                                <p class="card-text text-center">
+                                    <strong>{{ result.prediction }}</strong><br>
+                                    Confidence: {{ result.confidence }}%
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

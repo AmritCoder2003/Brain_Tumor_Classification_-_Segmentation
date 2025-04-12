@@ -93,7 +93,7 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center mb-4"> Brain Tumor Segmentation</h1>
+        <h1 class="text-center mb-4"> Scan MRI for Tumor Location</h1>
 
         <form action="/segmentation" method="post" enctype="multipart/form-data" class="border p-4 shadow rounded">
             <div class="mb-3">
@@ -106,8 +106,9 @@
         </form>
 
         <div class="text-center mt-4">
-            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">🔙 Back to Classification</a>
+            <a href="{{ url_for('classification') }}" class="btn btn-outline-secondary">Scan MRI for Tumor Detection</a>
         </div>
+        
 
         {% if results %}
             <h2 class="mt-5 text-center">🧪 Segmentation Results</h2>

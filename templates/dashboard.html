@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Doctor Dashboard</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f6f8fa;
+      }
+      .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+      }
+      .modal-header {
+        background-color: rgb(13, 49, 253);
+        color: white;
+      }
+      .navbar {
+        margin-bottom: 1.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4">
+      <a class="navbar-brand" href="#">MRI Portal</a>
+      <div class="ms-auto">
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-light"
+          >Logout</a
+        >
+      </div>
+    </nav>
+
+    <div class="container">
+      {% with messages = get_flashed_messages() %} {% if messages %}
+      <div class="alert alert-info">{{ messages[0] }}</div>
+      {% endif %} {% endwith %}
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Welcome, Dr. {{ doctor.name }}</h2>
+        <button
+          class="btn btn-success"
+          data-bs-toggle="modal"
+          data-bs-target="#addPatientModal"
+        >
+          + Add Patient
+        </button>
+      </div>
+      <div>
+        <h3>Patient List</h3>
+      </div>
+      {% if not patients %}
+      <p>No patients found. Start by adding a new patient.</p>
+      {% else %}
+      <div class="row">
+        {% for patient in patients %}
+        <div class="col-12 mb-3">
+          <div
+            class="card p-3 w-100 d-flex flex-column flex-md-row justify-content-between align-items-center"
+          >
+            <div class="mb-2 mb-md-0">
+              <h5 class="mb-1">{{ patient.name }}</h5>
+              <p class="mb-0 text-muted">
+                <strong>Phone:</strong> {{ patient.phone }}
+              </p>
+            </div>
+            <div>
+              <a href="{{ url_for('view_patient', patient_id=patient.unique_id) }}" class="btn btn-outline-primary me-2">View Details</a>
+
+
+              <form
+                method="POST"
+                action="{{ url_for('delete_patient', patient_id=patient._id) }}"
+                class="d-inline"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-outline-danger"
+                  onclick="return confirm('Are you sure you want to delete this patient?')"
+                >
+                  Delete
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Add Patient Modal -->
+    <div
+      class="modal fade"
+      id="addPatientModal"
+      tabindex="-1"
+      aria-labelledby="addPatientModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <form
+            method="POST"
+            action="{{ url_for('add_patient') }}"
+            class="needs-validation"
+            novalidate
+          >
+            <div class="modal-header">
+              <h5 class="modal-title" id="addPatientModalLabel">
+                Add New Patient
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body row g-3">
+              <div class="col-md-6">
+                <label for="name" class="form-label">Full Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  class="form-control"
+                  required
+                  minlength="3"
+                  pattern="^[A-Za-z\s]+$"
+                  placeholder="John Doe"
+                  autofocus
+                />
+                <div class="invalid-feedback">
+                  Please enter the full name (at least 3 characters).
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <label for="age" class="form-label">Age</label>
+                <input
+                  type="number"
+                  name="age"
+                  class="form-control"
+                  required
+                  min="0"
+                  max="120"
+                  placeholder="25"
+                />
+                <div class="invalid-feedback">
+                  Please enter a valid age (0–120).
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <label for="gender" class="form-label">Gender</label>
+                <select name="gender" class="form-select" required>
+                  <option selected disabled value="">Choose...</option>
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Other</option>
+                </select>
+                <div class="invalid-feedback">Please select a gender.</div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="email" class="form-label">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  class="form-control"
+                  pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                  placeholder="d9B4T@example.com"
+                  required
+                />
+                <div class="invalid-feedback">
+                  Please enter a valid email address.
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="phone" class="form-label">Phone</label>
+                <input
+                  type="text"
+                  name="phone"
+                  class="form-control"
+                  placeholder="1234567890"
+                  pattern="^\d{10}$"
+                  required
+                />
+                <div class="invalid-feedback">
+                  Please enter a 10-digit phone number.
+                </div>
+              </div>
+
+              <div class="col-12">
+                <label for="address" class="form-label">Address</label>
+                <textarea
+                  name="address"
+                  class="form-control"
+                  rows="3"
+                  required
+                ></textarea>
+                <div class="invalid-feedback">Please enter the address.</div>
+              </div>
+
+              <div class="col-12">
+                <label for="symptoms" class="form-label">Symptoms</label>
+                <textarea
+                  name="symptoms"
+                  class="form-control"
+                  rows="5"
+                  required
+                ></textarea>
+                <div class="invalid-feedback">
+                  Please describe the symptoms.
+                </div>
+              </div>
+
+              <div class="col-12">
+                <label for="medical_history" class="form-label"
+                  >Medical History</label
+                >
+                <textarea
+                  name="medical_history"
+                  class="form-control"
+                  rows="5"
+                  required
+                ></textarea>
+                <div class="invalid-feedback">
+                  Please provide medical history.
+                </div>
+              </div>
+
+              <div class="col-12">
+                <label for="notes" class="form-label">Additional Notes</label>
+                <textarea name="notes" class="form-control" rows="5"></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">Add Patient</button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script>
+      (() => {
+        "use strict";
+        const forms = document.querySelectorAll(".needs-validation");
+
+        Array.from(forms).forEach((form) => {
+          form.addEventListener(
+            "submit",
+            (event) => {
+              if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add("was-validated");
+            },
+            false
+          );
+        });
+      })();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

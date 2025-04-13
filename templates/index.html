@@ -99,7 +99,7 @@
     <div class="container">
         <h1 class="text-center mb-4">Scan MRI for Tumor Detection</h1>
 
-        <form action="/predict" method="post" enctype="multipart/form-data" class="border p-4 shadow rounded">
+        <form action="/predict/{{ patient._id }}" method="post" enctype="multipart/form-data" class="border p-4 shadow rounded">
             <div class="mb-3">
                 <label for="images" class="form-label fw-semibold text-primary" >Upload MRI Images</label>
                 <input type="file" class="form-control" name="images" id="images" multiple accept="image/*" placeholder="Upload MRI Images" required>
@@ -110,12 +110,10 @@
         </form>
 
         <div class="text-center mt-4">
-            <a href="{{ url_for('segmentation') }}" class="btn btn-outline-secondary">Scan MRI for Tumor Location</a>
+            <a href="{{ url_for('segmentations', patient_id=patient._id) }}" class="btn btn-outline-secondary">Scan MRI for Tumor Location</a>
+            <a href="{{ url_for('view_patient', patient_id=patient._id) }}" class="btn btn-secondary ms-2  "><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
         </div>
 
-        <div class="text-center mt-4">
-            <a href="{{ url_for('') }}" class="btn btn-outline-secondary">Scan MRI for Tumor Location</a>
-        </div>
 
         {% if results %}
             <h2 class="mt-5 text-center">🧠 Prediction Results</h2>

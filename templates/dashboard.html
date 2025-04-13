@@ -22,17 +22,16 @@
         color: white;
       }
       .navbar {
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
+        border-radius: 0 0 12px 12px;
       }
     </style>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4">
-      <a class="navbar-brand" href="#">MRI Portal</a>
+      <a class="navbar-brand" href="#"><i class="fa-solid fa-hospital-user me-2"></i>MRI Portal</a>
       <div class="ms-auto">
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-light"
-          >Logout</a
-        >
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-light"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a>
       </div>
     </nav>
 

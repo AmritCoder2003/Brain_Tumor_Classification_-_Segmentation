@@ -95,7 +95,7 @@
     <div class="container">
         <h1 class="text-center mb-4"> Scan MRI for Tumor Location</h1>
 
-        <form action="/segmentation" method="post" enctype="multipart/form-data" class="border p-4 shadow rounded">
+        <form action="/segmentation/{{ patient._id }}" method="post" enctype="multipart/form-data" class="border p-4 shadow rounded">
             <div class="mb-3">
                 <label for="images" class="form-label fw-semibold text-success">Upload MRI Images</label>
                 <input type="file" class="form-control" name="images" id="images" multiple accept="image/*" required>
@@ -106,7 +106,8 @@
         </form>
 
         <div class="text-center mt-4">
-            <a href="{{ url_for('classification') }}" class="btn btn-outline-secondary">Scan MRI for Tumor Detection</a>
+            <a href="{{ url_for('classification', patient_id=patient._id) }}" class="btn btn-outline-secondary">Scan MRI for Tumor Detection</a>
+            <a href="{{ url_for('view_patient', patient_id=patient._id) }}" class="btn btn-secondary ms-2  "><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
         </div>
         
 

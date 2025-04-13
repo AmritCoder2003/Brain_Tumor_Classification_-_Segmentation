@@ -227,13 +227,10 @@ from bson.errors import InvalidId
 def view_patient(patient_id):
     
     try:
-        # First try ObjectId (Mongo's internal ID)
         try:
             patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
         except (InvalidId, TypeError):
             patient = None
-
-        # Fallback: Try using unique_id (your custom UUID)
         if not patient:
             patient = patients_collection.find_one({'unique_id': patient_id})
 
@@ -244,17 +241,14 @@ def view_patient(patient_id):
         return render_template('view_patient.html', patient=patient)
 
     except Exception as e:
-        print(f"Error while retrieving patient: {e}")  # helpful during dev
+        print(f"Error while retrieving patient: {e}")  
         flash("Something went wrong while retrieving the patient.", "danger")
         return redirect(url_for('dashboard'))
 
 @app.route('/delete_patient/<string:patient_id>', methods=['POST'])
 def delete_patient(patient_id):
     try:
-        # Remove patient from the database
         patients_collection.delete_one({'_id': ObjectId(patient_id)})
-
-        # Also remove this patient_id from the doctor's active_patients array
         doctor_id = session.get('doctor_id')
         if doctor_id:
             doctors_collection.update_one(
@@ -270,13 +264,15 @@ def delete_patient(patient_id):
 
     return redirect(url_for('dashboard'))
 
-@app.route('/classification')
-def classification():
-    return render_template('index.html')
+@app.route('/classification/<patient_id>', methods=['GET'])
+def classification(patient_id):
+    patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
+    return render_template('index.html', patient=patient)
 
-@app.route('/segmentations')
-def segmentations():
-    return render_template('segmentation.html')
+@app.route('/segmentations/<patient_id>', methods=['GET'])
+def segmentations(patient_id):
+    patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
+    return render_template('segmentation.html', patient=patient)
 
 
     
@@ -288,8 +284,9 @@ def logout():
         
 
 
-@app.route('/predict', methods=['POST'])
-def predict():
+@app.route('/predict/<patient_id>', methods=['POST'])
+def predict(patient_id):
+    patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
     results = []
     files = request.files.getlist('images')
 
@@ -323,12 +320,13 @@ def predict():
                 "timestamp": datetime.now(),
             })
 
-    return render_template('index.html', results=results)
+    return render_template('index.html', results=results, patient=patient)
 
 
 
-@app.route('/segmentation', methods=['GET', 'POST'])
-def segmentation():
+@app.route('/segmentation/<patient_id>', methods=['GET', 'POST'])
+def segmentation(patient_id):
+    patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
     segmented_results = []
 
     if request.method == 'POST':
@@ -384,7 +382,7 @@ def segmentation():
                     upsert=True  # Optional: to insert if not present
                 )
 
-    return render_template('segmentation.html', results=segmented_results)
+    return render_template('segmentation.html', results=segmented_results, patient=patient)
 
 
 

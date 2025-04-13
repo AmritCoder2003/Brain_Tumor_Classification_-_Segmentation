@@ -99,6 +99,16 @@
         <i class="fa-solid fa-user me-1"></i> Patient Details
       </button>
     </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="classification-tab" data-bs-toggle="tab" data-bs-target="#classification" type="button" role="tab">
+        <i class="fa-solid fa-microscope me-1"></i> Classification Results
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="segmentation-tab" data-bs-toggle="tab" data-bs-target="#segmentation" type="button" role="tab">
+        <i class="fa-solid fa-brain me-1"></i> Segmentation Results
+      </button>
+    </li>
     
   </ul>
 
@@ -135,6 +145,54 @@
         </div>
         {% endfor %}
       </div>
+   
+  </div>
+      <!-- Classification Results Tab -->
+      <div class="tab-pane fade" id="classification" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+          <h4>Previous Classification Results</h4>
+        </div>
+        <div class="card p-4">
+          {% if classification_results %}
+            {% for result in classification_results %}
+              <div class="info-row">
+                <div><strong>Image:</strong><br>
+                  <img src="{{ result.cloudinary_url }}" class="img-fluid mt-2 rounded" style="max-width: 300px;" />
+                </div>
+                <div><strong>Prediction:</strong> {{ result.prediction }}</div>
+                <div><strong>Confidence:</strong> {{ result.confidence }}%</div>
+                
+              </div>
+            {% endfor %}
+          {% else %}
+            <p>No classification results available.</p>
+          {% endif %}
+        </div>
+      </div>
+    
+      <!-- Segmentation Results Tab -->
+      <div class="tab-pane fade" id="segmentation" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+          <h4>Previous Segmentation Results</h4>
+        </div>
+        <div class="card p-4">
+          {% if segmentation_results %}
+            {% for result in segmentation_results %}
+              <div class="info-row">
+                <div><strong>Image:</strong><br>
+                  <img src="{{ result.original_url }}" class="img-fluid mt-2 rounded" style="max-width: 300px;" />
+                  <img src="{{ result.segmented_url }}" class="img-fluid mt-2 rounded" style="max-width: 300px;" />
+                 
+                </div>
+               
+                
+                
+              </div>
+            {% endfor %}
+          {% else %}
+            <p>No segmentation results available.</p>
+          {% endif %}
+        </div>
     </div>
 
    

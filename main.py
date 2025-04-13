@@ -1,17 +1,26 @@
+import cloudinary
+import cloudinary.uploader
+
+
+
 from pymongo import MongoClient
 from datetime import datetime, timedelta, timezone
 import os
 from dotenv import load_dotenv
 load_dotenv()
+
+
 # Connect to MongoDB
 mongourl = os.getenv("MONGO_URI")
+
 
 client = MongoClient(mongourl)
 
 db = client["brain_tumor_detection"]
-predictions_collection = db["predictions"]
 doctors_collection = db["doctors"]
 patients_collection = db["patients"]
+classification_results = db["classification"]
+segmentation_results = db["segmentation"]
 
 from flask import Flask, request, render_template, redirect, url_for, flash, session
 from flask_pymongo import PyMongo
@@ -33,6 +42,15 @@ app.config["MONGO_URI"] = os.getenv("MONGO_URI")
 mongo = PyMongo(app)
 bycypt = Bcrypt(app)
 from bson.objectid import ObjectId
+
+
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUD_NAME"),
+    api_key=os.getenv("CLOUD_API_KEY"),
+    api_secret=os.getenv("CLOUD_SECRET")
+)
+
 
 JWT_SECRET = os.getenv("SECRET_KEY")
 JWT_EXPIRY = int(os.getenv("JWT_EXPIRY_SECONDS") or 1800)
@@ -105,6 +123,8 @@ def login():
     return render_template('login.html')
 
 
+from jwt.exceptions import ExpiredSignatureError
+
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
     token = session.get('jwt_token')
@@ -112,20 +132,29 @@ def dashboard():
         flash("Please log in first", 'warning')
         return redirect(url_for('login'))
 
-    
-    payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except ExpiredSignatureError:
+        flash("Session expired. Please log in again.", 'warning')
+        session.clear()  
+        return redirect(url_for('login'))
+    except jwt.InvalidTokenError:
+        flash("Invalid token. Please log in again.", 'danger')
+        session.clear()
+        return redirect(url_for('login'))
+
     doctor = doctors_collection.find_one({'email': payload['email']})
-    
-    # Fetch patients related to this doctor
+    if not doctor:
+        flash("Doctor not found. Please log in again.", 'danger')
+        session.clear()
+        return redirect(url_for('login'))
+
     patients = list(patients_collection.find({'doctor_id': str(doctor['_id'])}))
 
     return render_template('dashboard.html', doctor=doctor, patients=patients)
 
-    
-   
 
-
-    
+     
 
 from bson import ObjectId
 import re
@@ -225,7 +254,6 @@ from bson.errors import InvalidId
 
 @app.route('/view_patient/<string:patient_id>')
 def view_patient(patient_id):
-    
     try:
         try:
             patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
@@ -238,12 +266,26 @@ def view_patient(patient_id):
             flash("Patient not found.", "danger")
             return redirect(url_for('dashboard'))
 
-        return render_template('view_patient.html', patient=patient)
+        # Avoid shadowing collection names
+        classification_data = list(classification_results.find({'patient_id': patient_id}))
+        segmentation_data = list(segmentation_results.find({'patient_id': patient_id}))
+        print(patient_id)
+        print(classification_data)
+        print(segmentation_data)
+
+        return render_template(
+            'view_patient.html',
+            patient=patient,
+            classification_results=classification_data,
+            segmentation_results=segmentation_data
+        )
 
     except Exception as e:
         print(f"Error while retrieving patient: {e}")  
+        print(f"Error while retrieving patient: {e}")  
         flash("Something went wrong while retrieving the patient.", "danger")
         return redirect(url_for('dashboard'))
+
 
 @app.route('/delete_patient/<string:patient_id>', methods=['POST'])
 def delete_patient(patient_id):
@@ -268,7 +310,15 @@ def delete_patient(patient_id):
 def classification(patient_id):
     patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
     return render_template('index.html', patient=patient)
+@app.route('/classification/<patient_id>', methods=['GET'])
+def classification(patient_id):
+    patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
+    return render_template('index.html', patient=patient)
 
+@app.route('/segmentations/<patient_id>', methods=['GET'])
+def segmentations(patient_id):
+    patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
+    return render_template('segmentation.html', patient=patient)
 @app.route('/segmentations/<patient_id>', methods=['GET'])
 def segmentations(patient_id):
     patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
@@ -296,6 +346,11 @@ def predict(patient_id):
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
 
+            # Upload to Cloudinary
+            upload_result = cloudinary.uploader.upload(filepath, folder="mri_scans/")
+            cloudinary_url = upload_result['secure_url']
+
+            # Load and preprocess the image
             img = load_img(filepath, target_size=(128, 128))
             img_array = img_to_array(img) / 255.0
             img_array = np.expand_dims(img_array, axis=0)
@@ -306,19 +361,19 @@ def predict(patient_id):
 
             result_text = "No Tumor" if class_labels[predicted_class_index] == 'notumor' else f"Tumor: {class_labels[predicted_class_index]}"
 
-            results.append({
+            result = {
+                "patient_id": patient_id,
                 "filename": filename,
+                "cloudinary_url": cloudinary_url,
                 "prediction": result_text,
-                "confidence": f"{confidence_score:.2f}"
-            })
+                "confidence": round(confidence_score, 2)
+            }
 
-            predictions_collection.insert_one({
-                "filename": filename,
-                "prediction": result_text,
-                "confidence": confidence_score,
-                "segmented": None,  # Will be updated in segmentation route
-                "timestamp": datetime.now(),
-            })
+            classification_results.insert_one(result)
+            results.append(result)
+
+            # Optional: Remove local file after upload
+            os.remove(filepath)
 
     return render_template('index.html', results=results, patient=patient)
 
@@ -327,10 +382,12 @@ def predict(patient_id):
 @app.route('/segmentation/<patient_id>', methods=['GET', 'POST'])
 def segmentation(patient_id):
     patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
+@app.route('/segmentation/<patient_id>', methods=['GET', 'POST'])
+def segmentation(patient_id):
+    patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
     segmented_results = []
 
     if request.method == 'POST':
-        # Changed name from 'image' to 'images' to match HTML input
         files = request.files.getlist('images')
 
         for file in files:
@@ -339,48 +396,50 @@ def segmentation(patient_id):
                 filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(filepath)
 
-                # Load and preprocess the image
+                # Upload original to Cloudinary
+                original_upload = cloudinary.uploader.upload(filepath, folder="mri_scans/")
+                original_url = original_upload['secure_url']
+
                 img = load_img(filepath, color_mode='grayscale', target_size=(128, 128))
                 img_array = img_to_array(img) / 255.0
                 img_array = np.expand_dims(img_array, axis=0)
 
-                # Predict segmentation mask
                 mask = segmentation_model.predict(img_array)[0]
                 mask = (mask.squeeze() * 255).astype(np.uint8)
-
-                # Apply color map
                 mask_colored = cv2.applyColorMap(mask, cv2.COLORMAP_JET)
 
-                # Load and resize original image
                 original_img = Image.open(filepath).convert('RGB')
                 original_resized = original_img.resize((128, 128))
                 original_array = np.array(original_resized)
                 original_bgr = cv2.cvtColor(original_array, cv2.COLOR_RGB2BGR)
 
-                # Ensure shapes match before overlay
                 if original_bgr.shape != mask_colored.shape:
                     mask_colored = cv2.resize(mask_colored, (original_bgr.shape[1], original_bgr.shape[0]))
 
-                # Overlay prediction on image
                 overlay = cv2.addWeighted(original_bgr, 0.7, mask_colored, 0.3, 0)
 
-                # Save segmented image
+                # Save overlay temporarily
                 segmented_filename = f"seg_{filename}"
                 segmented_path = os.path.join(app.config['SEGMENTED_FOLDER'], segmented_filename)
                 cv2.imwrite(segmented_path, overlay)
 
-                # Collect result to display
-                segmented_results.append({
-                    "filename": filename,
-                    "segmented": segmented_filename
-                })
+                # Upload segmented overlay to Cloudinary
+                segmented_upload = cloudinary.uploader.upload(segmented_path, folder="segmented_scans/")
+                segmented_url = segmented_upload['secure_url']
 
-                # Update in database (if used)
-                predictions_collection.update_one(
-                    {"filename": filename},
-                    {"$set": {"segmented": segmented_filename}},
-                    upsert=True  # Optional: to insert if not present
-                )
+                result = {
+                    "patient_id": patient_id,
+                    "filename": filename,
+                    "original_url": original_url,
+                    "segmented_url": segmented_url
+                }
+
+                segmentation_results.insert_one(result)
+                segmented_results.append(result)
+
+                # Clean up local files
+                os.remove(filepath)
+                os.remove(segmented_path)
 
     return render_template('segmentation.html', results=segmented_results, patient=patient)
 

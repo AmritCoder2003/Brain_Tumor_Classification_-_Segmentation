@@ -96,6 +96,7 @@
         <h1 class="text-center mb-4"> Scan MRI for Tumor Location</h1>
 
         <form action="/segmentation/{{ patient._id }}" method="post" enctype="multipart/form-data" class="border p-4 shadow rounded">
+        <form action="/segmentation/{{ patient._id }}" method="post" enctype="multipart/form-data" class="border p-4 shadow rounded">
             <div class="mb-3">
                 <label for="images" class="form-label fw-semibold text-success">Upload MRI Images</label>
                 <input type="file" class="form-control" name="images" id="images" multiple accept="image/*" required>
@@ -117,7 +118,7 @@
                 {% for result in results %}
                     <div class="col-md-6">
                         <div class="card result-card shadow-sm">
-                            <img src="{{ url_for('static', filename='segmented/' + result.segmented) }}" class="card-img-top" alt="{{ result.filename }}">
+                            <img src="{{ result.segmented_url }}" class="card-img-top" alt="Segmented MRI for {{ result.filename }}">
                             <div class="card-body text-center">
                                 <h5 class="card-title">{{ result.filename }}</h5>
                                 <p class="card-text text-success">Tumor Region Highlighted</p>

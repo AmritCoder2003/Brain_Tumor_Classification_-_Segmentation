@@ -282,7 +282,6 @@ def view_patient(patient_id):
 
     except Exception as e:
         print(f"Error while retrieving patient: {e}")  
-        print(f"Error while retrieving patient: {e}")  
         flash("Something went wrong while retrieving the patient.", "danger")
         return redirect(url_for('dashboard'))
 
@@ -310,15 +309,7 @@ def delete_patient(patient_id):
 def classification(patient_id):
     patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
     return render_template('index.html', patient=patient)
-@app.route('/classification/<patient_id>', methods=['GET'])
-def classification(patient_id):
-    patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
-    return render_template('index.html', patient=patient)
 
-@app.route('/segmentations/<patient_id>', methods=['GET'])
-def segmentations(patient_id):
-    patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
-    return render_template('segmentation.html', patient=patient)
 @app.route('/segmentations/<patient_id>', methods=['GET'])
 def segmentations(patient_id):
     patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
@@ -332,7 +323,6 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
         
-
 
 @app.route('/predict/<patient_id>', methods=['POST'])
 def predict(patient_id):
@@ -379,9 +369,7 @@ def predict(patient_id):
 
 
 
-@app.route('/segmentation/<patient_id>', methods=['GET', 'POST'])
-def segmentation(patient_id):
-    patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
+
 @app.route('/segmentation/<patient_id>', methods=['GET', 'POST'])
 def segmentation(patient_id):
     patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
@@ -442,6 +430,7 @@ def segmentation(patient_id):
                 os.remove(segmented_path)
 
     return render_template('segmentation.html', results=segmented_results, patient=patient)
+
 
 
 

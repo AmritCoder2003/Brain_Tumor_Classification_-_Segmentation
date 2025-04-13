@@ -121,7 +121,7 @@
                 {% for result in results %}
                     <div class="col-md-4">
                         <div class="card result-card shadow-sm">
-                            <img src="{{ url_for('static', filename='uploads/' + result.filename) }}" class="card-img-top" alt="{{ result.filename }}">
+                            <img src="{{ result.cloudinary_url }}" class="card-img-top" alt="{{ result.filename }}">
                             <div class="card-body">
                                 <h5 class="card-title text-center">{{ result.filename }}</h5>
                                 <p class="card-text text-center">

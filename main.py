@@ -1,7 +1,7 @@
+from itsdangerous import URLSafeTimedSerializer
+
 import cloudinary
 import cloudinary.uploader
-
-
 
 from pymongo import MongoClient
 from datetime import datetime, timedelta, timezone
@@ -21,11 +21,12 @@ doctors_collection = db["doctors"]
 patients_collection = db["patients"]
 classification_results = db["classification"]
 segmentation_results = db["segmentation"]
-
+contact_us=db["contact"]
 from flask import Flask, request, render_template, redirect, url_for, flash, session
 from flask_pymongo import PyMongo
 from flask_bcrypt import Bcrypt
 import jwt
+from flask_mail import Mail, Message
 
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array, load_img
@@ -36,12 +37,23 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 
 
+
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 app.config["MONGO_URI"] = os.getenv("MONGO_URI")
 mongo = PyMongo(app)
 bycypt = Bcrypt(app)
 from bson.objectid import ObjectId
+# After 'app = Flask(__name__)'
+app.config['MAIL_SERVER'] = os.getenv("MAIL_SERVER")
+app.config['MAIL_PORT'] = int(os.getenv("MAIL_PORT"))
+app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
+app.config['MAIL_USE_TLS'] = os.getenv("MAIL_USE_TLS") == "True"
+app.config['MAIL_USE_SSL'] = os.getenv("MAIL_USE_SSL") == "True"
+
+mail = Mail(app)
+s = URLSafeTimedSerializer(app.secret_key)
 
 
 
@@ -73,6 +85,73 @@ class_labels = ['pituitary', 'notumor', 'meningioma', 'glioma']
 @app.route('/')
 def home():
     return render_template('home.html')
+
+
+@app.route('/contact', methods=['POST'])
+def contact():
+    name = request.form['name']
+    email = request.form['email']
+    message = request.form['message']
+    contact_us.insert_one({
+        'name': name,
+        'email': email,
+        'message': message,
+        'timestamp': datetime.now()
+    })
+    flash('Message sent successfully!', 'success')
+    return redirect('/#contact')
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form['email']
+        user = doctors_collection.find_one({'email': email})
+
+        if user:
+            token = s.dumps(email, salt='email-confirm')
+            link = url_for('reset_password', token=token, _external=True)
+
+            msg = Message('Password Reset Request',
+                          sender=app.config['MAIL_USERNAME'],
+                          recipients=[email])
+            msg.body = f'''Hi {user['name']},
+
+You requested to reset your password. Please click the link below to set a new password:
+
+{link}
+
+If you didn’t request this, you can ignore this email.
+
+Thanks,
+Brain Tumor Detection System Team
+'''
+            mail.send(msg)
+            flash('Password reset link sent to your email.', 'info')
+            return redirect(url_for('login'))
+
+        else:
+            flash('No account found with that email.', 'danger')
+
+    return render_template('forgot_password.html')
+
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    try:
+        email = s.loads(token, salt='email-confirm', max_age=1800)
+    except Exception as e:
+        flash('The reset link is invalid or has expired.', 'danger')
+        return redirect(url_for('forgot_password'))
+
+    if request.method == 'POST':
+        new_password = request.form['password']
+        hashed_pw = bycypt.generate_password_hash(new_password).decode('utf-8')
+        doctors_collection.update_one({'email': email}, {'$set': {'password': hashed_pw}})
+        flash('Your password has been updated successfully.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('reset_password.html')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -114,7 +193,7 @@ def login():
                 JWT_SECRET, algorithm='HS256'
             )
             session['jwt_token'] = token
-            session['user_id'] = str(doctor['_id'])  # Optional: store doctor ID for later use
+            session['user_id'] = str(doctor['_id'])  
             return redirect(url_for('dashboard'))
         else:
             flash('Invalid credentials. Please try again.', 'danger')

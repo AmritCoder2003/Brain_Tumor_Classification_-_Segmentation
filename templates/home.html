@@ -4,75 +4,231 @@
   <meta charset="UTF-8">
   <title>Brain Tumor Detection System</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/png">
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
   <style>
     body {
-      background: linear-gradient(to right,rgb(135, 211, 243),rgb(7, 66, 183));
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
+      scroll-behavior: smooth;
     }
 
-    .glass-card {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 20px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-      color: #fff;
-      padding: 50px 40px;
+    h1{
+      font-weight: bold;
+      color:rgb(3, 43, 85);
+    }
+
+    .navbar {
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .navbar-brand, .nav-link {
+      color: white !important;
+    }
+
+    .hero-section {
+      background: linear-gradient(to right, #87d3f3, #0742b7);
+      color: white;
+      padding: 100px 20px;
       text-align: center;
-      max-width: 600px;
-      width: 100%;
-      animation: fadeIn 1s ease-out;
     }
 
-    h1 {
-      font-size: 2.8rem;
-      font-weight: 700;
+    .hero-image {
+      width: 100px;
       margin-bottom: 20px;
     }
 
-    p {
-      font-size: 1.2rem;
-      margin-bottom: 35px;
+    .illustration {
+      max-width: 300px;
+      margin-top: 30px;
     }
 
     .btn-custom {
       padding: 12px 25px;
-      font-size: 1rem;
-      border-radius: 50px;
+      font-size: 1.1rem;
+      border-radius: 40px;
       margin: 0 10px;
       transition: all 0.3s ease-in-out;
     }
 
     .btn-custom:hover {
       transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
+    section {
+      padding: 80px 20px;
+    }
+
+    .section-heading {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 40px;
+    }
+
+    .contact-form input, .contact-form textarea {
+      margin-bottom: 15px;
+    }
+
+    footer {
+      background: #03235b;
+      color: white;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    @media (max-width: 768px) {
+      .btn-custom {
+        display: block;
+        width: 100%;
+        margin: 10px 0;
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="glass-card">
-    <h1>Brain Tumor Detection</h1>
-    <p>Empowering doctors with AI for accurate brain tumor identification and segmentation.</p>
-    <div>
-      <a href="{{ url_for('login') }}" class="btn btn-light btn-custom">Login</a>
-      <a href="{{ url_for('register') }}" class="btn btn-light btn-custom">Register</a>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href={{ url_for('home') }}>Brain Tumor Detection</a>
+      <button class="navbar-toggler  " type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item  "><a class="nav-link " href="#home">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i>Doctor Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i>Admin Login</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <!-- Hero Section -->
+<section id="home" class="hero-section text-center text-white d-flex align-items-center justify-content-center" style="min-height: 100vh; background: linear-gradient(to right, #4facfe, #00f2fe); overflow: hidden;">
+  <div class="container py-5" data-aos="fade-up">
+    <div class="row align-items-center">
+      <!-- Text Content -->
+      <div class="col-lg-6 text-lg-start text-center mb-4 mb-lg-0">
+        <h1 class="display-4  fw-bold mb-3">Brain Tumor Detection</h1>
+        <p class="lead fs-5  ">Empowering doctors with <strong>AI</strong> for fast, accurate brain tumor identification and segmentation.</p>
+        <p class="mt-4 text-white-500">Our tool transforms MRI data into life-saving decisions using deep learning.</p>
+      </div>
+
+      <!-- Brain Scan Image -->
+      <div class="col-lg-6 text-center">
+        <img src="static/uploads/Te-gl_0293.jpg" alt="Brain Scan Illustration"
+             class="img-fluid rounded-4 shadow-lg" style="max-height: 400px;">
+      </div>
     </div>
   </div>
+</section>
 
+
+<!-- Advanced About Section -->
+<section id="about" class="bg-light text-dark py-5">
+  <div class="container">
+    <h2 class="section-heading text-center mb-5 fw-bold">About the System</h2>
+    <div class="row align-items-center">
+      <!-- Image with fade-in animation -->
+      <div class="col-lg-6 mb-4 mb-lg-0" data-aos="fade-right">
+        <img src="https://plus.unsplash.com/premium_photo-1690297732590-b9875f77471d?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+             alt="Brain Tumor AI System"
+             class="img-fluid rounded-4 shadow-lg">
+      </div>
+
+      <!-- Content Section -->
+      <div class="col-lg-6" data-aos="fade-left">
+        <p class="lead">
+          The <strong>Brain Tumor Detection System</strong> is a powerful AI-driven diagnostic tool that leverages cutting-edge deep learning algorithms to analyze MRI brain scans.
+        </p>
+        <ul class="list-unstyled fs-5">
+          <li class="mb-3">
+            <i class="fas fa-brain text-primary me-2"></i>
+            <strong>High Accuracy:</strong> Trained on thousands of labeled MRI scans for precise tumor detection and segmentation.
+          </li>
+          <li class="mb-3">
+            <i class="fas fa-laptop-medical text-success me-2"></i>
+            <strong>Real-time Analysis:</strong> Provides instant tumor predictions with confidence scores for faster diagnosis.
+          </li>
+          <li class="mb-3">
+            <i class="fas fa-user-md text-danger me-2"></i>
+            <strong>Doctor-Friendly Interface:</strong> Designed for radiologists and neurologists to interpret and visualize results easily.
+          </li>
+          <li class="mb-3">
+            <i class="fas fa-heartbeat text-warning me-2"></i>
+            <strong>Life-Saving Potential:</strong> Enables early tumor detection, reducing delays in treatment and improving patient survival rates.
+          </li>
+        </ul>
+        <p class="mt-4">
+          With a mission to bridge the gap between AI and healthcare, this system empowers doctors with faster, smarter tools—making quality care accessible to more lives.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+  <!-- Contact Section -->
+  <section id="contact" class="text-white" style="background-color: #0742b7;">
+    <div class="container">
+      <h2 class="section-heading">Contact Us</h2>
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <form class="contact-form" action="/contact" method="POST" >
+            <input type="text" name="name" id="name" min="3" class="form-control" placeholder="Your Name" required>
+            <input type="email" name="email" id="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" class="form-control" placeholder="Your Email" required>
+            <textarea class="form-control" name="message" id="message" min="10"  rows="5" placeholder="Your Message" required></textarea>
+            <button type="submit" class="btn btn-light btn-custom mt-2">Send Message</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      &copy; 2025 Brain Tumor Detection AI | Built with 💙 and AI
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    (() => {
+      "use strict";
+      const forms = document.querySelectorAll(".needs-validation");
+
+      Array.from(forms).forEach((form) => {
+        form.addEventListener(
+          "submit",
+          (event) => {
+            if (!form.checkValidity()) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            form.classList.add("was-validated");
+          },
+          false
+        );
+      });
+    })();
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script>
+  AOS.init({
+    once: true, // animation only once
+    duration: 1000, // animation duration
+  });
+</script>
 </body>
 </html>

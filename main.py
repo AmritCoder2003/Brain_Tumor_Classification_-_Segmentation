@@ -22,6 +22,7 @@ patients_collection = db["patients"]
 classification_results = db["classification"]
 segmentation_results = db["segmentation"]
 contact_us=db["contact"]
+admins=db["admin"]
 from flask import Flask, request, render_template, redirect, url_for, flash, session
 from flask_pymongo import PyMongo
 from flask_bcrypt import Bcrypt
@@ -36,6 +37,7 @@ import cv2
 from werkzeug.utils import secure_filename
 from PIL import Image
 
+from werkzeug.security import check_password_hash
 
 
 app = Flask(__name__)
@@ -85,6 +87,134 @@ class_labels = ['pituitary', 'notumor', 'meningioma', 'glioma']
 @app.route('/')
 def home():
     return render_template('home.html')
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        
+        admin = admins.find_one({'email': email})
+        
+        if admin and admin['password'] == password:
+            # ✅ Store admin session details
+            session['admin_logged_in'] = True
+            session['admin_email'] = admin['email']
+            session['admin_id'] = str(admin['_id'])  # Optional, if you need to track by ID
+
+            flash('Logged in successfully!', 'success')
+            return redirect(url_for('create_doctor'))
+        else:
+            flash('Invalid credentials', 'danger')
+
+    return render_template('admin_login.html')
+
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('admin_logged_in', None)
+    session.pop('admin_email', None)
+    session.pop('admin_id', None)
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('admin_login'))
+
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+def send_doctor_credentials_email(to_email, name, password):
+    msg = Message('Your Doctor Account Credentials',
+                  sender=app.config['MAIL_USERNAME'],
+                  recipients=[to_email])
+    
+    msg.body = f'''Hello Dr. {name},
+
+Your doctor account has been created successfully.
+
+You can now log in using the following credentials:
+
+Email: {to_email}
+Password: {password}
+
+Please keep this information secure.
+
+Regards,  
+Admin Team
+'''
+
+    try:
+        mail.send(msg)
+        print("Doctor credentials email sent successfully.")
+    except Exception as e:
+        print("Error sending doctor credentials email:", e)
+
+
+
+
+@app.route('/admin/create-doctor', methods=['GET', 'POST'])
+def create_doctor():
+    if not session.get('admin_logged_in'):
+        flash('Please login as admin first.', 'warning')
+        return redirect(url_for('admin_login'))
+
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+
+        # Hash the password before saving
+        hashed_password = bycypt.generate_password_hash(password).decode('utf-8')
+        
+        # Insert doctor into the collection
+        doctor = doctors_collection.insert_one({
+            'name': name,
+            'email': email,
+            'password': hashed_password,
+            'created_by': session.get('admin_email')
+        })
+
+        # Get the inserted doctor ID
+        doctor_id = doctor.inserted_id
+
+        # Add the doctor ID to the admin's "doctors" array
+        admins.update_one(
+            {'email': session.get('admin_email')}, 
+            {'$push': {'doctors': doctor_id}}
+        )
+
+        # Send email with credentials
+        send_doctor_credentials_email(email, name, password)
+
+        flash('Doctor created successfully and credentials sent via email!', 'success')
+        return redirect(url_for('create_doctor'))
+
+    doctor_list = list(doctors_collection.find())
+    return render_template('create_doctor.html', doctors=doctor_list)
+
+
+from bson.objectid import ObjectId
+@app.route('/admin/delete-doctor/<doctor_id>', methods=['POST'])
+def delete_doctor(doctor_id):
+    if not session.get('admin_logged_in'):
+        flash('Please login as admin first.', 'warning')
+        return redirect(url_for('admin_login'))
+
+    try:
+        # First, delete the doctor from the doctors collection
+        doctors_collection.delete_one({'_id': ObjectId(doctor_id)})
+
+        # Remove the doctor's ID from the admin's "doctors" array
+        admins.update_one(
+            {'email': session.get('admin_email')}, 
+            {'$pull': {'doctors': ObjectId(doctor_id)}}
+        )
+
+        flash('Doctor deleted successfully.', 'success')
+    except Exception as e:
+        flash(f'Error deleting doctor: {e}', 'danger')
+
+    return redirect(url_for('create_doctor'))
+
 
 
 @app.route('/contact', methods=['POST'])

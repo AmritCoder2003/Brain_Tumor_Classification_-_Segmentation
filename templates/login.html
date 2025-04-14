@@ -5,7 +5,7 @@
   <title>Login - Brain Tumor Detection</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/png">
   <style>
     body {
       background: linear-gradient(to right,rgb(9, 33, 76),rgb(31, 112, 204));
@@ -68,7 +68,8 @@
           <li class="nav-item"><a class="nav-link" href={{ url_for('home') }}>About</a></li>
           <li class="nav-item"><a class="nav-link" href={{ url_for('home') }}>Contact</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i>Doctor Login</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i>Admin Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_login') }}"><i class="fas fa-user-shield"></i> Admin Login</a></li>
+
         </ul>
       </div>
     </div>

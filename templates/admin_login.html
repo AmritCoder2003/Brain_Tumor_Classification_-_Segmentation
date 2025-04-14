@@ -1,0 +1,81 @@
+<!-- templates/admin_login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Login - Brain Tumor Detection</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to right, rgb(9, 33, 76),rgb(31, 112, 204));
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .register-box {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+      width: 100%;
+    }
+    .form-control {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+    }
+    .form-control::placeholder {
+      color: #e0e0e0;
+    }
+    .btn-custom {
+      width: 100%;
+      margin-top: 10px;
+    }
+    .navbar {
+        background-color: rgba(0, 0, 0, 0.7);
+      }
+  
+      .navbar-brand, .nav-link {
+        color: white !important;
+      }
+  </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+          <a class="navbar-brand" href={{ url_for('home') }}>Brain Tumor Detection</a>
+          <button class="navbar-toggler  " type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item  "><a class="nav-link " href={{ url_for('home') }}>Home</a></li>
+              <li class="nav-item"><a class="nav-link" href={{ url_for('home') }}>About</a></li>
+              <li class="nav-item"><a class="nav-link" href={{ url_for('home') }}>Contact</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i>Doctor Login</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_login') }}"><i class="fas fa-user-shield"></i> Admin Login</a></li>
+    
+            </ul>
+          </div>
+        </div>
+      </nav>
+  <div class="register-box">
+    <h3 class="text-center mb-4">Admin Login</h3>
+    <form method="POST" action="{{ url_for('admin_login') }}">
+      <div class="mb-3">
+        <input type="email" class="form-control" name="email" placeholder="Admin Email" required>
+      </div>
+      <div class="mb-3">
+        <input type="password" class="form-control" name="password" placeholder="Password" required>
+      </div>
+      <button type="submit" class="btn btn-light btn-custom">Login</button>
+    </form>
+  </div>
+
+</body>
+</html>

@@ -514,6 +514,20 @@ def delete_patient(patient_id):
 
     return redirect(url_for('dashboard'))
 
+# Delete classification result
+@app.route('/delete_classification/<result_id>', methods=['POST'])
+def delete_classification(result_id):
+    classification_results.delete_one({"_id": ObjectId(result_id)})
+    flash("Classification result deleted successfully.", "success")
+    return redirect(request.referrer or url_for('dashboard'))
+
+# Delete segmentation result
+@app.route('/delete_segmentation/<result_id>', methods=['POST'])
+def delete_segmentation(result_id):
+    segmentation_results.delete_one({"_id": ObjectId(result_id)})
+    flash("Segmentation result deleted successfully.", "success")
+    return redirect(request.referrer or url_for('dashboard'))
+
 @app.route('/classification/<patient_id>', methods=['GET'])
 def classification(patient_id):
     patient = patients_collection.find_one({'_id': ObjectId(patient_id)})

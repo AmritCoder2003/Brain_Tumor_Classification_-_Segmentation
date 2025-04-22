@@ -112,7 +112,7 @@
 
         <div class="text-center mt-4">
             <a href="{{ url_for('segmentations', patient_id=patient._id) }}" class="btn btn-outline-secondary">Scan MRI for Tumor Location</a>
-            <a href="{{ url_for('view_patient', patient_id=patient._id) }}" class="btn btn-secondary ms-2  "><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+            <a href="{{ url_for('view_patient', patient_id=patient._id) }}" class="btn btn-secondary ms-2  "><i class="fa-solid fa-arrow-left"></i> Back to Patient Details</a>
         </div>
 
 
@@ -122,7 +122,9 @@
                 {% for result in results %}
                     <div class="col-md-4">
                         <div class="card result-card shadow-sm">
-                            <img src="{{ result.cloudinary_url }}" class="card-img-top" alt="{{ result.filename }}">
+                            <a href="{{ result.cloudinary_url }}" target="_blank">
+                                <img src="{{ result.cloudinary_url }}" class="card-img-top" alt="{{ result.filename }}">
+                              </a>
                             <div class="card-body">
                                 <h5 class="card-title text-center">{{ result.filename }}</h5>
                                 <p class="card-text text-center">

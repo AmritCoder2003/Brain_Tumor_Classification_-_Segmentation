@@ -92,11 +92,13 @@
   </style>
 </head>
 <body>
+  <!-- Display Flash Messages -->
+
 
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
-      <a class="navbar-brand" href={{ url_for('home') }}>Brain Tumor Detection</a>
+      <a class="navbar-brand" href={{ url_for('home') }}>Brain Tumor Detection System</a>
       <button class="navbar-toggler  " type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -105,8 +107,8 @@
           <li class="nav-item  "><a class="nav-link " href="#home">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
           <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i>Doctor Login</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_login') }}"><i class="fas fa-user-shield"></i> Admin Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Doctor Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_login') }}">Admin Login</a></li>
 
         </ul>
       </div>
@@ -120,7 +122,7 @@
     <div class="row align-items-center">
       <!-- Text Content -->
       <div class="col-lg-6 text-lg-start text-center mb-4 mb-lg-0">
-        <h1 class="display-4  fw-bold mb-3">Brain Tumor Detection</h1>
+        <h1 class="display-4  fw-bold mb-3">Brain Tumor Detection System</h1>
         <p class="lead fs-5  ">Empowering doctors with <strong>AI</strong> for fast, accurate brain tumor identification and segmentation.</p>
         <p class="mt-4 text-white-500">Our tool transforms MRI data into life-saving decisions using deep learning.</p>
       </div>
@@ -195,11 +197,22 @@
       </div>
     </div>
   </section>
+  <div id="flashMessage" class="container bg-light p-3" >
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-info">
+          {% for message in messages %}
+            <p>{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+  </div>
 
   <!-- Footer -->
   <footer>
     <div class="container">
-      &copy; 2025 Brain Tumor Detection AI | Built with 💙 and AI
+      &copy; 2025 Brain Tumor Detection System
     </div>
   </footer>
 
@@ -231,5 +244,16 @@
     duration: 1000, // animation duration
   });
 </script>
+<script>
+  window.onload = function() {
+    const flashMessage = document.getElementById('flashMessage');
+    if (flashMessage) {
+      setTimeout(function() {
+        flashMessage.style.display = 'none';
+      }, 3000); // Hide after 5 seconds
+    }
+  };
+</script>
+
 </body>
 </html>

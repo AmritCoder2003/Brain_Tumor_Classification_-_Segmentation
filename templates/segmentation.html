@@ -94,6 +94,17 @@
 </head>
 <body>
     <div class="container">
+        <div id="flashMessage" class="container bg-light p-3" >
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="alert alert-info">
+                  {% for message in messages %}
+                    <p>{{ message }}</p>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+          </div>
         <h1 class="text-center mb-4"> Scan MRI for Tumor Location</h1>
 
         <form action="/segmentation/{{ patient._id }}" method="post" enctype="multipart/form-data" class="border p-4 shadow rounded">
@@ -103,6 +114,7 @@
                 <input type="file" class="form-control" name="images" id="images" multiple accept="image/*" required>
             </div>
             <div class="d-grid">
+                
                 <button type="submit" class="btn btn-success">Locate Tumor</button>
             </div>
         </form>

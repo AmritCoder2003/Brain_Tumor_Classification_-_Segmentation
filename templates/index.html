@@ -99,7 +99,17 @@
 <body>
     <div class="container">
         <h1 class="text-center mb-4">Scan MRI for Tumor Detection</h1>
-
+        <div id="flashMessage" class="container bg-light p-3" >
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="alert alert-info">
+                  {% for message in messages %}
+                    <p>{{ message }}</p>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+          </div>
         <form action="/predict/{{ patient._id }}" method="post" enctype="multipart/form-data" class="border p-4 shadow rounded">
             <div class="mb-3">
                 <label for="images" class="form-label fw-semibold text-primary" >Upload MRI Images</label>

@@ -8,6 +8,17 @@
   <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/png">
 </head>
 <body>
+  <div id="flashMessage" class="container bg-light p-3" >
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-info">
+          {% for message in messages %}
+            <p>{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+  </div>
   <div class="container mt-5 mb-5 ">
     <h3 class="mb-4">Edit Patient Information</h3>
     <form method="POST">

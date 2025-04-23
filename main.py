@@ -307,6 +307,19 @@ def register():
     
     return render_template('register.html')
 
+from functools import wraps
+from flask import make_response, request
+
+def nocache(view):
+    @wraps(view)
+    def no_cache(*args, **kwargs):
+        response = make_response(view(*args, **kwargs))
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+    return no_cache
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -373,6 +386,21 @@ from uuid import uuid4
 
 @app.route('/add_patient', methods=['POST'])
 def add_patient():
+    token = session.get('jwt_token')
+    if not token:
+        flash("Please log in first", 'warning')
+        return redirect(url_for('login'))
+
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except ExpiredSignatureError:
+        flash("Session expired. Please log in again.", 'warning')
+        session.clear()  
+        return redirect(url_for('login'))
+    except jwt.InvalidTokenError:
+        flash("Invalid token. Please log in again.", 'danger')
+        session.clear()
+        return redirect(url_for('login'))
     if 'user_id' not in session:
         flash("Unauthorized", "danger")
         return redirect(url_for('login'))
@@ -438,6 +466,21 @@ def add_patient():
 # Edit Patient
 @app.route('/edit_patient/<patient_id>', methods=['GET', 'POST'])
 def edit_patient(patient_id):
+    token = session.get('jwt_token')
+    if not token:
+        flash("Please log in first", 'warning')
+        return redirect(url_for('login'))
+
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except ExpiredSignatureError:
+        flash("Session expired. Please log in again.", 'warning')
+        session.clear()  
+        return redirect(url_for('login'))
+    except jwt.InvalidTokenError:
+        flash("Invalid token. Please log in again.", 'danger')
+        session.clear()
+        return redirect(url_for('login'))
     patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
 
     if request.method == 'POST':
@@ -463,6 +506,21 @@ from bson.errors import InvalidId
 
 @app.route('/view_patient/<string:patient_id>')
 def view_patient(patient_id):
+    token = session.get('jwt_token')
+    if not token:
+        flash("Please log in first", 'warning')
+        return redirect(url_for('login'))
+
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except ExpiredSignatureError:
+        flash("Session expired. Please log in again.", 'warning')
+        session.clear()  
+        return redirect(url_for('login'))
+    except jwt.InvalidTokenError:
+        flash("Invalid token. Please log in again.", 'danger')
+        session.clear()
+        return redirect(url_for('login'))
     try:
         try:
             patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
@@ -497,6 +555,21 @@ def view_patient(patient_id):
 
 @app.route('/delete_patient/<string:patient_id>', methods=['POST'])
 def delete_patient(patient_id):
+    token = session.get('jwt_token')
+    if not token:
+        flash("Please log in first", 'warning')
+        return redirect(url_for('login'))
+
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except ExpiredSignatureError:
+        flash("Session expired. Please log in again.", 'warning')
+        session.clear()  
+        return redirect(url_for('login'))
+    except jwt.InvalidTokenError:
+        flash("Invalid token. Please log in again.", 'danger')
+        session.clear()
+        return redirect(url_for('login'))
     try:
         patients_collection.delete_one({'_id': ObjectId(patient_id)})
         doctor_id = session.get('doctor_id')
@@ -517,6 +590,21 @@ def delete_patient(patient_id):
 # Delete classification result
 @app.route('/delete_classification/<result_id>', methods=['POST'])
 def delete_classification(result_id):
+    token = session.get('jwt_token')
+    if not token:
+        flash("Please log in first", 'warning')
+        return redirect(url_for('login'))
+
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except ExpiredSignatureError:
+        flash("Session expired. Please log in again.", 'warning')
+        session.clear()  
+        return redirect(url_for('login'))
+    except jwt.InvalidTokenError:
+        flash("Invalid token. Please log in again.", 'danger')
+        session.clear()
+        return redirect(url_for('login'))
     classification_results.delete_one({"_id": ObjectId(result_id)})
     flash("Classification result deleted successfully.", "success")
     return redirect(request.referrer or url_for('dashboard'))
@@ -524,17 +612,62 @@ def delete_classification(result_id):
 # Delete segmentation result
 @app.route('/delete_segmentation/<result_id>', methods=['POST'])
 def delete_segmentation(result_id):
+    token = session.get('jwt_token')
+    if not token:
+        flash("Please log in first", 'warning')
+        return redirect(url_for('login'))
+
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except ExpiredSignatureError:
+        flash("Session expired. Please log in again.", 'warning')
+        session.clear()  
+        return redirect(url_for('login'))
+    except jwt.InvalidTokenError:
+        flash("Invalid token. Please log in again.", 'danger')
+        session.clear()
+        return redirect(url_for('login'))
     segmentation_results.delete_one({"_id": ObjectId(result_id)})
     flash("Segmentation result deleted successfully.", "success")
     return redirect(request.referrer or url_for('dashboard'))
 
 @app.route('/classification/<patient_id>', methods=['GET'])
 def classification(patient_id):
+    token = session.get('jwt_token')
+    if not token:
+        flash("Please log in first", 'warning')
+        return redirect(url_for('login'))
+
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except ExpiredSignatureError:
+        flash("Session expired. Please log in again.", 'warning')
+        session.clear()  
+        return redirect(url_for('login'))
+    except jwt.InvalidTokenError:
+        flash("Invalid token. Please log in again.", 'danger')
+        session.clear()
+        return redirect(url_for('login'))
     patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
     return render_template('index.html', patient=patient)
 
 @app.route('/segmentations/<patient_id>', methods=['GET'])
 def segmentations(patient_id):
+    token = session.get('jwt_token')
+    if not token:
+        flash("Please log in first", 'warning')
+        return redirect(url_for('login'))
+
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except ExpiredSignatureError:
+        flash("Session expired. Please log in again.", 'warning')
+        session.clear()  
+        return redirect(url_for('login'))
+    except jwt.InvalidTokenError:
+        flash("Invalid token. Please log in again.", 'danger')
+        session.clear()
+        return redirect(url_for('login'))
     patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
     return render_template('segmentation.html', patient=patient)
 
@@ -549,6 +682,21 @@ def logout():
 
 @app.route('/predict/<patient_id>', methods=['POST'])
 def predict(patient_id):
+    token = session.get('jwt_token')
+    if not token:
+        flash("Please log in first", 'warning')
+        return redirect(url_for('login'))
+
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except ExpiredSignatureError:
+        flash("Session expired. Please log in again.", 'warning')
+        session.clear()  
+        return redirect(url_for('login'))
+    except jwt.InvalidTokenError:
+        flash("Invalid token. Please log in again.", 'danger')
+        session.clear()
+        return redirect(url_for('login'))
     patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
     results = []
     files = request.files.getlist('images')
@@ -595,6 +743,21 @@ def predict(patient_id):
 
 @app.route('/segmentation/<patient_id>', methods=['GET', 'POST'])
 def segmentation(patient_id):
+    token = session.get('jwt_token')
+    if not token:
+        flash("Please log in first", 'warning')
+        return redirect(url_for('login'))
+
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except ExpiredSignatureError:
+        flash("Session expired. Please log in again.", 'warning')
+        session.clear()  
+        return redirect(url_for('login'))
+    except jwt.InvalidTokenError:
+        flash("Invalid token. Please log in again.", 'danger')
+        session.clear()
+        return redirect(url_for('login'))
     patient = patients_collection.find_one({'_id': ObjectId(patient_id)})
     segmented_results = []
 

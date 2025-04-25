@@ -5,9 +5,7 @@
   <title>Brain Tumor Detection System</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/png">
-  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
   <style>
@@ -92,10 +90,6 @@
   </style>
 </head>
 <body>
-  <!-- Display Flash Messages -->
-
-
-  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
       <a class="navbar-brand" href={{ url_for('home') }}>Brain Tumor Detection System</a>
@@ -114,20 +108,14 @@
       </div>
     </div>
   </nav>
-
-  <!-- Hero Section -->
-  <!-- Hero Section -->
 <section id="home" class="hero-section text-center text-white d-flex align-items-center justify-content-center" style="min-height: 100vh; background: linear-gradient(to right, #4facfe, #00f2fe); overflow: hidden;">
   <div class="container py-5" data-aos="fade-up">
     <div class="row align-items-center">
-      <!-- Text Content -->
       <div class="col-lg-6 text-lg-start text-center mb-4 mb-lg-0">
         <h1 class="display-4  fw-bold mb-3">Brain Tumor Detection System</h1>
         <p class="lead fs-5  ">Empowering doctors with <strong>AI</strong> for fast, accurate brain tumor identification and segmentation.</p>
         <p class="mt-4 text-white-500">Our tool transforms MRI data into life-saving decisions using deep learning.</p>
       </div>
-
-      <!-- Brain Scan Image -->
       <div class="col-lg-6 text-center">
         <img src="static/uploads/Te-gl_0293.jpg" alt="Brain Scan Illustration"
              class="img-fluid rounded-4 shadow-lg" style="max-height: 400px;">
@@ -136,20 +124,15 @@
   </div>
 </section>
 
-
-<!-- Advanced About Section -->
 <section id="about" class="bg-light text-dark py-5">
   <div class="container">
     <h2 class="section-heading text-center mb-5 fw-bold">About the System</h2>
     <div class="row align-items-center">
-      <!-- Image with fade-in animation -->
       <div class="col-lg-6 mb-4 mb-lg-0" data-aos="fade-right">
         <img src="https://plus.unsplash.com/premium_photo-1690297732590-b9875f77471d?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
              alt="Brain Tumor AI System"
              class="img-fluid rounded-4 shadow-lg">
       </div>
-
-      <!-- Content Section -->
       <div class="col-lg-6" data-aos="fade-left">
         <p class="lead">
           The <strong>Brain Tumor Detection System</strong> is a powerful AI-driven diagnostic tool that leverages cutting-edge deep learning algorithms to analyze MRI brain scans.
@@ -179,9 +162,6 @@
     </div>
   </div>
 </section>
-
-
-  <!-- Contact Section -->
   <section id="contact" class="text-white" style="background-color: #0742b7;">
     <div class="container">
       <h2 class="section-heading">Contact Us</h2>
@@ -208,15 +188,12 @@
       {% endif %}
     {% endwith %}
   </div>
-
-  <!-- Footer -->
   <footer>
     <div class="container">
       &copy; 2025 Brain Tumor Detection System
     </div>
   </footer>
 
-  <!-- Scripts -->
   <script>
     (() => {
       "use strict";
@@ -240,8 +217,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 <script>
   AOS.init({
-    once: true, // animation only once
-    duration: 1000, // animation duration
+    once: true, 
+    duration: 1000, 
   });
 </script>
 <script>
@@ -250,7 +227,7 @@
     if (flashMessage) {
       setTimeout(function() {
         flashMessage.style.display = 'none';
-      }, 3000); // Hide after 5 seconds
+      }, 3000); 
     }
   };
 </script>
